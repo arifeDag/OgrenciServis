@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OgrenciServis.Models
 {
-   
+
     public class Sinif
     {
         [Key]

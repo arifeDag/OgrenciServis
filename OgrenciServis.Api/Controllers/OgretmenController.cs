@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using OgrenciServis.Logic.Interface;
-using OgrenciServis.Models.DTO;
 using OgrenciServis.Models;
+using OgrenciServis.Models.DTO;
 
 namespace OgrenciServis.Api.Controllers
 {

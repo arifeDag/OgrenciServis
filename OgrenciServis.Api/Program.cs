@@ -23,8 +23,11 @@ namespace OgrenciServis.Api
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             //1. Çözüm
-            builder.Services.AddScoped<IOgrenci,  OgrenciServis.Logic.Services.OgrenciServisImpl>();
+            builder.Services.AddScoped<IOgrenci, OgrenciServis.Logic.Services.OgrenciServisImpl>();
             builder.Services.AddScoped<IOgretmen, OgretmenServis>();
+            builder.Services.AddScoped<ISinav, SinavServis>();
+            builder.Services.AddScoped<ISinif, SinifServis>();
+            builder.Services.AddScoped<IDers, DersServis>();
 
             var app = builder.Build();
 
