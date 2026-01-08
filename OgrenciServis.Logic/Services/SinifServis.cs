@@ -2,6 +2,7 @@
 using OgrenciServis.Logic.Interface;
 using OgrenciServis.Models;
 using OgrenciServis.Models.DTO;
+using OgrenciServis.Models.Exceptions;
 
 namespace OgrenciServis.Logic.Services
 {
@@ -47,13 +48,27 @@ namespace OgrenciServis.Logic.Services
                                  Sube = sinif.Sube,
                                  SinifNo = sinif.SinifNo
                              }).FirstOrDefault();
+
+                if (sonuc != null)
+                {
+                    throw new NotFoundException("Sinif", id);
+
+                }
+
+
                 return sonuc;
 
             }
-            catch (Exception)
+            catch (NotFoundException)
+            {
+                throw;
+
+            }
+
+            catch (Exception ex)
             {
 
-                throw;
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 
@@ -65,7 +80,7 @@ namespace OgrenciServis.Logic.Services
 
                 if (mevcutSinif == null)
                 {
-                    return null;
+                    throw new NotFoundException("Sinif ", id);
                 }
 
                 mevcutSinif.SinifId = sinif.SinifId;
@@ -75,10 +90,18 @@ namespace OgrenciServis.Logic.Services
                 _context.SaveChanges();
                 return mevcutSinif;
             }
-            catch (Exception)
+
+            catch (NotFoundException)
+            {
+                //bulunamadı demek ki tekrar fırlat
+                throw;
+            }
+
+
+            catch (Exception ex)
             {
 
-                throw;
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 
@@ -92,7 +115,7 @@ namespace OgrenciServis.Logic.Services
                 if (sinif == null)
                 {
 
-                    return false;
+                    throw new NotFoundException("Sinif", id);
                 }
 
                 _context.Siniflar.Remove(sinif);
@@ -100,10 +123,14 @@ namespace OgrenciServis.Logic.Services
                 return true;
 
             }
-            catch (Exception)
+            catch (NotFoundException)
             {
-
+                //bulunamadı demek ki tekrar fırlat
                 throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 

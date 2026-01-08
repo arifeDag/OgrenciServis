@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OgrenciServis.Logic.Interface;
 using OgrenciServis.Models;
 using OgrenciServis.Models.DTO;
+using OgrenciServis.Models.Exceptions;
 
 namespace OgrenciServis.Api.Controllers
 {
@@ -22,15 +24,26 @@ namespace OgrenciServis.Api.Controllers
         }
         //get:api
         [HttpGet("{id}")]
+        [AllowAnonymous]
 
         public ActionResult<OgretmenDto> GetOgretmen(int id)
         {
-            var ogretmenDto = this.ogretmen.OgretmenGetirById(id);
-            if (ogretmenDto == null)
+
+            try
             {
-                return NotFound($"ögretmen ID {id} bulunamadı.");
+                var ogretmenDto = this.ogretmen.OgretmenGetirById(id);
+                return Ok(ogretmenDto);
+
             }
-            return Ok(ogretmenDto);
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message} {id}");
+            }
         }
         //post:api/ogretmen
         [HttpPost]
@@ -48,6 +61,7 @@ namespace OgrenciServis.Api.Controllers
         }
         // Put : api/Ogretmen/5
         [HttpPut("{id}")]
+        [AllowAnonymous]
         public ActionResult<Ogretmen> PutOgrenci(int id, [FromBody] Ogretmen ogretmen)
         {
             if (!ModelState.IsValid)
@@ -55,15 +69,21 @@ namespace OgrenciServis.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            var guncellenenOgretmen = this.ogretmen.OgretmenGuncelle(id, ogretmen);
-
-            if (guncellenenOgretmen == null)
-
+            try
             {
-                return NotFound($"Ögretmen ID {id} bulunamdı.");
-            }
+                var guncellenenOgretmen = this.ogretmen.OgretmenGuncelle(id, ogretmen);
+                return Ok(guncellenenOgretmen);
 
-            return Ok(guncellenenOgretmen);
+            }
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message}{id}");
+            }
 
 
         }
@@ -71,16 +91,26 @@ namespace OgrenciServis.Api.Controllers
         //Delete
 
         [HttpDelete("{id}")]
+        [AllowAnonymous]
 
         public ActionResult DeleteOgretmen(int id)
         {
-            var silindi = this.ogretmen.OgretmenSil(id);
-
-            if (!silindi)
+            try
             {
-                return NotFound($"Ögretmen ID {id} bulunamadı");
+                var silindi = this.ogretmen.OgretmenSil(id);
+                return NoContent();
+
             }
-            return NoContent();
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message}{id}");
+
+            }
 
         }
 

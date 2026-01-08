@@ -2,6 +2,7 @@
 using OgrenciServis.Logic.Interface;
 using OgrenciServis.Models;
 using OgrenciServis.Models.DTO;
+using OgrenciServis.Models.Exceptions;
 
 namespace OgrenciServis.Logic.Services
 {
@@ -43,13 +44,23 @@ namespace OgrenciServis.Logic.Services
                                  DersAdi = ders.DersAdi,
                                  DersSuresi = ders.DersSuresi,
                              }).FirstOrDefault();
+                // bulunmadıysa 
+                if (sonuc == null)
+                {
+                    throw new NotFoundException("Ders", id);
+                }
                 return sonuc;
 
             }
-            catch (Exception)
+            catch (NotFoundException)
             {
-
+                //fırlatılan hatayı yakala ve geri fırlat
                 throw;
+            }
+            catch (Exception ex)
+            {
+                //başka hata geldiyse beklenmeyen olarak fırlat
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 
@@ -61,7 +72,7 @@ namespace OgrenciServis.Logic.Services
 
                 if (mevcutDers == null)
                 {
-                    return null;
+                    throw new NotFoundException("Ders", id);
                 }
 
                 mevcutDers.DersId = ders.DersId;
@@ -73,10 +84,15 @@ namespace OgrenciServis.Logic.Services
 
 
             }
-            catch (Exception)
+            catch (NotFoundException)
             {
-
+                //fırlatılan hatayı yakala ve geri fırlat
                 throw;
+            }
+            catch (Exception ex)
+            {
+                //başka hata geldiyse beklenmeyen olarak fırlat
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 
@@ -86,17 +102,24 @@ namespace OgrenciServis.Logic.Services
             {
                 var ders = _context.Dersler.Find(id);
                 if (ders == null)
-                { return false; }
+                {
+                    throw new NotFoundException("Ders", id);
+                }
 
                 _context.Dersler.Remove(ders);
                 _context.SaveChanges();
                 return true;
 
             }
-            catch (Exception)
+            catch (NotFoundException)
             {
-
+                //fırlatılan hatayı yakala ve geri fırlat
                 throw;
+            }
+            catch (Exception ex)
+            {
+                //başka hata geldiyse beklenmeyen olarak fırlat
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 

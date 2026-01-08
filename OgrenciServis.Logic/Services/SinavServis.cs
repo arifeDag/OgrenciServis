@@ -2,11 +2,7 @@
 using OgrenciServis.Logic.Interface;
 using OgrenciServis.Models;
 using OgrenciServis.Models.DTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OgrenciServis.Models.Exceptions;
 
 namespace OgrenciServis.Logic.Services
 {
@@ -21,7 +17,7 @@ namespace OgrenciServis.Logic.Services
         }
         public Sinav SinavEkle(Sinav sinav)
         {
-           {
+            {
                 try
                 {
                     _context.Sinavlar.Add(sinav);
@@ -35,7 +31,7 @@ namespace OgrenciServis.Logic.Services
                 }
 
             }
-            
+
         }
 
         public SinavDto? SinavGetirById(int id)
@@ -60,12 +56,22 @@ namespace OgrenciServis.Logic.Services
                                  Brans = ogretmen.Brans
                              }).FirstOrDefault();
 
+                if (sonuc == null)
+                {
+                    throw new NotFoundException("Ögrenci", id);
+
+                }
+
                 return sonuc;
             }
-            catch (Exception)
+            catch (NotFoundException)
             {
 
                 throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 
@@ -73,27 +79,31 @@ namespace OgrenciServis.Logic.Services
         {
             try
             {
-                var mevcutSinav =_context.Sinavlar.Find(id);
+                var mevcutSinav = _context.Sinavlar.Find(id);
 
                 if (mevcutSinav == null)
                 {
-                    return null;
+                    throw new NotFoundException("Sinav", id);
                 }
 
                 mevcutSinav.SinavId = sinav.SinavId;
                 mevcutSinav.DersId = sinav.DersId;
                 mevcutSinav.OgrenciId = sinav.OgrenciId;
-                mevcutSinav.OgretmenId= sinav.OgretmenId;
+                mevcutSinav.OgretmenId = sinav.OgretmenId;
                 mevcutSinav.Not = sinav.Not;
 
                 _context.SaveChanges();
                 return mevcutSinav;
 
             }
-            catch (Exception)
+            catch (NotFoundException)
             {
 
                 throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 
@@ -102,22 +112,27 @@ namespace OgrenciServis.Logic.Services
             try
             {
                 var sinav = _context.Sinavlar.Find(id);
-                if(sinav == null)
+                if (sinav == null)
                 {
+                    throw new NotFoundException("Sinav", id);
 
-                return false; 
+
                 }
 
                 _context.Sinavlar.Remove(sinav);
-                _context.SaveChanges() ;
+                _context.SaveChanges();
                 return true;
 
 
             }
-            catch (Exception)
+            catch (NotFoundException)
             {
 
                 throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 
@@ -152,4 +167,3 @@ namespace OgrenciServis.Logic.Services
         }
     }
 }
- 

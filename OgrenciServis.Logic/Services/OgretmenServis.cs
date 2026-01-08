@@ -2,6 +2,7 @@
 using OgrenciServis.Logic.Interface;
 using OgrenciServis.Models;
 using OgrenciServis.Models.DTO;
+using OgrenciServis.Models.Exceptions;
 
 namespace OgrenciServis.Logic.Services
 {
@@ -28,7 +29,7 @@ namespace OgrenciServis.Logic.Services
                 throw;
             }
         }
-    
+
 
         public OgretmenDto? OgretmenGetirById(int id)
         {
@@ -47,12 +48,21 @@ namespace OgrenciServis.Logic.Services
                                  SinifNo = sinif.SinifNo
                              }).FirstOrDefault();
 
+                if (sonuc == null)
+                {
+                    throw new NotFoundException("Ögretmen ", id);
+                }
+
                 return sonuc;
             }
-            catch (Exception)
+            catch (NotFoundException)
             {
 
                 throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Beklenmeyen bir hata oluştu ", ex);
             }
         }
 
@@ -64,11 +74,11 @@ namespace OgrenciServis.Logic.Services
 
                 if (mevcutOgretmen == null)
                 {
-                    return null;
+                    throw new NotFoundException("Ögretmen", id);
                 }
 
                 mevcutOgretmen.OgretmenAdi = ogretmen.OgretmenAdi;
-                mevcutOgretmen.OgretmenSoyadi= ogretmen.OgretmenSoyadi;
+                mevcutOgretmen.OgretmenSoyadi = ogretmen.OgretmenSoyadi;
                 mevcutOgretmen.Brans = ogretmen.Brans;
                 mevcutOgretmen.Sinif = ogretmen.Sinif;
 
@@ -76,33 +86,46 @@ namespace OgrenciServis.Logic.Services
                 return mevcutOgretmen;
 
             }
-            catch (Exception)
+
+            catch (NotFoundException)
             {
 
                 throw;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 
         public bool OgretmenSil(int id)
         {
-           
-                try
-                {
-                    var ogretmen  = _context.Ogretmenler.Find(id);
-                    if (ogretmen == null)
-                    {
-                        return false;
 
-                    }
-                    _context.Ogretmenler.Remove(ogretmen);
-                    _context.SaveChanges();
-                    return true;
+            try
+            {
+                var ogretmen = _context.Ogretmenler.Find(id);
+
+                if (ogretmen == null)
+                {
+                    throw new NotFoundException("Ögretmen", id);
 
                 }
-            catch (Exception)
+                _context.Ogretmenler.Remove(ogretmen);
+                _context.SaveChanges();
+                return true;
+
+            }
+
+            catch (NotFoundException)
             {
 
                 throw;
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 

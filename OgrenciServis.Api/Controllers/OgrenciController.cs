@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OgrenciServis.Logic.Interface;
 using OgrenciServis.Models;
 using OgrenciServis.Models.DTO;
+using OgrenciServis.Models.Exceptions;
 
 namespace OgrenciServis.Api.Controllers
 {
@@ -26,15 +26,26 @@ namespace OgrenciServis.Api.Controllers
         }
         //get:api
         [HttpGet("{id}")]
-
+        [AllowAnonymous]
         public ActionResult<OgrenciDto> GetOgrenci(int id)
         {
-            var ogrenciDto = this.ogrenci.OgrenciGetirById(id);
-            if (ogrenciDto == null)
+            try
             {
-                return NotFound($"ögrenci ID {id} bulunamadı.");
+                var ogrenciDto = this.ogrenci.OgrenciGetirById(id);
+                return Ok(ogrenciDto);
             }
-            return Ok(ogrenciDto);
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                //String concat
+                //return StatusCode(500 ,"Bilinmeyen bir hata oluştu" + ex.Message);
+                //Strig interpolation
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message} {id}");
+
+            }
         }
         //post:api/ogenci
         [HttpPost]
@@ -52,22 +63,29 @@ namespace OgrenciServis.Api.Controllers
         }
         // Put : api/Ogrenci/5
         [HttpPut("{id}")]
-        public ActionResult<Ogrenci> PutOgrenci(int id,[FromBody] Ogrenci ogrenci)
+        [AllowAnonymous]
+        public ActionResult<Ogrenci> PutOgrenci(int id, [FromBody] Ogrenci ogrenci)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var guncellenenOgrenci = this.ogrenci.OgrenciGuncelle(id, ogrenci);
+            try
+            {
+                var guncellenenOgrenci = this.ogrenci.OgrenciGuncelle(id, ogrenci);
+                return Ok(guncellenenOgrenci);
 
-            if(guncellenenOgrenci == null)
-
-            { 
-                return NotFound($"Ögrenci ID {id} bulunamdı.");
             }
+            catch (NotFoundException ex)
+            {
 
-            return Ok(guncellenenOgrenci);
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message}{id}");
+            }
 
 
         }
@@ -75,21 +93,35 @@ namespace OgrenciServis.Api.Controllers
         //Delete
 
         [HttpDelete("{id}")]
+        [AllowAnonymous]
 
         public ActionResult DeleteOgrenci(int id)
         {
-            var silindi =this.ogrenci.OgrenciSil(id);
-
-            if (!silindi)
+            try
             {
-                return NotFound($"Ögrenci ID {id} bulunamadı");
+                var silindi = this.ogrenci.OgrenciSil(id);
+                return NoContent();
+
             }
-            return NoContent();
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message}{id}");
+
+            }
+
+
+
+
 
         }
 
-        
-        
-        
+
+
+
     }
 }

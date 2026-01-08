@@ -1,6 +1,7 @@
 ﻿using OgrenciServis.DataAccess;
 using OgrenciServis.Models;
 using OgrenciServis.Models.DTO;
+using OgrenciServis.Models.Exceptions;
 
 namespace OgrenciServis.Logic.Services
 {
@@ -32,25 +33,38 @@ namespace OgrenciServis.Logic.Services
         {
             try
             {
+                //sorgula ve Bul
                 var sonuc = (from ogrenci in _context.Ogrenciler
-                            join sinif in _context.Siniflar on ogrenci.SinifId equals sinif.SinifId
-                            where ogrenci.OgrenciId==id
-                            select new OgrenciDto
-                            {
-                                OgrenciId = ogrenci.OgrenciId,
-                                Adi = ogrenci.Adi,
-                                Soyadi = ogrenci.Soyadi,
-                                DogumTarihi = ogrenci.DogumTarihi,
-                                Sube = sinif.Sube,
-                                SinifNo = sinif.SinifNo
-                            }).FirstOrDefault();
+                             join sinif in _context.Siniflar on ogrenci.SinifId equals sinif.SinifId
+                             where ogrenci.OgrenciId == id
+                             select new OgrenciDto
+                             {
+                                 OgrenciId = ogrenci.OgrenciId,
+                                 Adi = ogrenci.Adi,
+                                 Soyadi = ogrenci.Soyadi,
+                                 DogumTarihi = ogrenci.DogumTarihi,
+                                 Sube = sinif.Sube,
+                                 SinifNo = sinif.SinifNo
+                             }).FirstOrDefault();
+
+                //bulunamadıysa 
+                if (sonuc == null)
+                {
+                    //hata fırlat
+                    throw new NotFoundException("Ögrenci", id);
+                }
 
                 return sonuc;
             }
-            catch (Exception)
+            catch (NotFoundException)
             {
-
+                //fırlatılan hatayı yakala ve geri fırlat
                 throw;
+            }
+            catch (Exception ex)
+            {
+                //başka hata geldiyse beklenmeyen olarak fırlat
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 
@@ -58,26 +72,32 @@ namespace OgrenciServis.Logic.Services
         {
             try
             {
+                //sorgula ve Bul
                 var mevcutOgrenci = _context.Ogrenciler.Find(id);
 
-                if (mevcutOgrenci== null)
+                //bulunamadıysa
+                if (mevcutOgrenci == null)
                 {
-                    return null;
+                    throw new NotFoundException("Öğrenci", id);
                 }
 
                 mevcutOgrenci.Adi = ogrenci.Adi;
                 mevcutOgrenci.Soyadi = ogrenci.Soyadi;
-                mevcutOgrenci.DogumTarihi=ogrenci.DogumTarihi;
+                mevcutOgrenci.DogumTarihi = ogrenci.DogumTarihi;
                 mevcutOgrenci.SinifId = ogrenci.SinifId;
 
                 _context.SaveChanges();
                 return mevcutOgrenci;
 
             }
-            catch (Exception)
+            catch (NotFoundException)
             {
-
+                //bulunamadı demek ki tekrar fırlat
                 throw;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 
@@ -85,22 +105,33 @@ namespace OgrenciServis.Logic.Services
         {
             try
             {
-                var ogrenci = _context.Ogrenciler.Find( id);
-                if (ogrenci== null)
+                //sorgula ve bul
+                var ogrenci = _context.Ogrenciler.Find(id);
+
+                //bulunamadıysa
+                if (ogrenci == null)
                 {
-                    return false;
+                    throw new NotFoundException("Ögrenci", id);
+
 
                 }
                 _context.Ogrenciler.Remove(ogrenci);
-               _context.SaveChanges();
+                _context.SaveChanges();
                 return true;
 
 
             }
-            catch (Exception)
+
+            catch (NotFoundException)
             {
 
                 throw;
+            }
+
+            catch (Exception ex)
+            {
+
+                throw new Exception("Beklenmeyen bir hata oluştu", ex);
             }
         }
 

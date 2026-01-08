@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OgrenciServis.Logic.Interface;
 using OgrenciServis.Models;
 using OgrenciServis.Models.DTO;
+using OgrenciServis.Models.Exceptions;
 
 namespace OgrenciServis.Api.Controllers
 {
@@ -26,15 +28,27 @@ namespace OgrenciServis.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
 
         public ActionResult<DersDto> GetDers(int id)
         {
-            var DersDto = this.ders.DersGetirById(id);
-            if (DersDto == null)
+            try
             {
-                return NotFound($"Ders ID{id} bulunamadı");
+                var DersDto = this.ders.DersGetirById(id);
+                return Ok(DersDto);
+
             }
-            return Ok(DersDto);
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message} {id}");
+            }
+
+
         }
 
         //postapi
@@ -54,6 +68,7 @@ namespace OgrenciServis.Api.Controllers
 
 
         [HttpPut("{id}")]
+        [AllowAnonymous]
 
         public ActionResult<Sinif> PutDers(int id, [FromBody] Ders ders)
         {
@@ -62,31 +77,48 @@ namespace OgrenciServis.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-
-            var guncelllenenDers = this.ders.DersGuncelle(id, ders);
-
-            if (guncelllenenDers == null)
+            try
             {
-                return NotFound($"Ders ID {id}bulunamdı.");
+                var guncelllenenDers = this.ders.DersGuncelle(id, ders);
+                return Ok(guncelllenenDers);
+
+            }
+            catch (NotFoundException ex)
+
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message}{id}");
 
             }
 
-            return Ok(guncelllenenDers);
+
 
         }
 
         //delete
         [HttpDelete("{id}")]
+        [AllowAnonymous]
 
         public ActionResult DeleteDers(int id)
         {
-            var silindi = this.ders.DersSil(id);
-
-            if (!silindi)
+            try
             {
-                return NotFound($"Ders ID {id} bulunamadı.");
+                var silindi = this.ders.DersSil(id);
+                return NoContent();
+
             }
-            return NoContent();
+            catch (NotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message}{id}");
+            }
         }
 
 

@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OgrenciServis.Logic.Interface;
 using OgrenciServis.Models;
 using OgrenciServis.Models.DTO;
+using OgrenciServis.Models.Exceptions;
 
 namespace OgrenciServis.Api.Controllers
 {
@@ -26,16 +28,27 @@ namespace OgrenciServis.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
 
         public ActionResult<SinifDto> GetSinif(int id)
         {
-            var SinifDto = this.sinif.SinifGetirById(id);
-            if (SinifDto == null)
+            try
             {
-                return NotFound($"sinif ID {id} bulunamadı");
+                var SinifDto = this.sinif.SinifGetirById(id);
+                return Ok(SinifDto);
+
+            }
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message} {id}");
             }
 
-            return Ok(SinifDto);
+
         }
         //postapi
         [HttpPost]
@@ -51,6 +64,7 @@ namespace OgrenciServis.Api.Controllers
             return CreatedAtAction(nameof(GetSinif), new { id = yeniSinif.SinifId }, yeniSinif);
         }
         [HttpPut("{id}")]
+        [AllowAnonymous]
 
         public ActionResult<Sinif> PutSinif(int id, [FromBody] Sinif sinif)
 
@@ -59,32 +73,52 @@ namespace OgrenciServis.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var guncellenenSinif = this.sinif.SinifGuncelle(id, sinif);
-            if (guncellenenSinif == null)
+            try
             {
-                return NotFound($"Sinav ID {id}bulunamdı.");
+                var guncellenenSinif = this.sinif.SinifGuncelle(id, sinif);
+                return Ok(guncellenenSinif);
+
+            }
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message}{id}");
             }
 
-            return Ok(guncellenenSinif);
+
 
 
         }
 
         //delete
         [HttpDelete("{id}")]
+        [AllowAnonymous]
 
         public ActionResult DeleteSinif(int id)
         {
-            var silindi = this.sinif.SinifSil(id);
-
-            if (!silindi)
+            try
             {
-                return NotFound($"Sinif ID {id} bulunamadı.");
+                var silindi = this.sinif.SinifSil(id);
+                return NoContent();
+
             }
-            return NoContent();
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message}{id}");
+
+            }
+
+
         }
-
-
 
 
     }

@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OgrenciServis.Logic.Interface;
 using OgrenciServis.Models;
 using OgrenciServis.Models.DTO;
+using OgrenciServis.Models.Exceptions;
 
 namespace OgrenciServis.Api.Controllers
 {
@@ -25,15 +27,27 @@ namespace OgrenciServis.Api.Controllers
             return Ok(this.sinav.TumSinavlariListele());
         }
         [HttpGet("{id}")]
+        [AllowAnonymous]
 
         public ActionResult<SinavDto> GetSinav(int id)
         {
-            var sinavDto = this.sinav.SinavGetirById(id);
-            if (sinavDto == null)
+            try
             {
-                return NotFound($"sinav ID{id} bulunamadı.");
+                var sinavDto = this.sinav.SinavGetirById(id);
+                return Ok(sinavDto);
+
             }
-            return Ok(sinavDto);
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu{ex.Message}{id}");
+            }
+
+
         }
 
         //postapi
@@ -53,34 +67,59 @@ namespace OgrenciServis.Api.Controllers
         //put:api
 
         [HttpPut("{id}")]
+        [AllowAnonymous]
+
         public ActionResult<Sinav> PutSinav(int id, [FromBody] Sinav sinav)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var guncellenenSinav = this.sinav.SinavGuncelle(id, sinav);
-            if (guncellenenSinav == null)
+
+            try
             {
-                return NotFound($"Sinav ID {id}bulunamdı.");
+                var guncellenenSinav = this.sinav.SinavGuncelle(id, sinav);
+                return Ok(guncellenenSinav);
+            }
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message}{id}");
             }
 
-            return Ok(guncellenenSinav);
+
+
+
         }
 
         //Delete
         [HttpDelete("{id}")]
+        [AllowAnonymous]
 
 
         public ActionResult DeleteSinav(int id)
         {
-            var silindi = this.sinav.SinavSil(id);
-
-            if (!silindi)
+            try
             {
-                return NotFound($"Sinav ID {id} bulunamadı.");
+                var silindi = this.sinav.SinavSil(id);
+                return NoContent();
+
             }
-            return NoContent();
+            catch (NotFoundException ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Bilinmeyen bir hata oluştu {ex.Message}{id}");
+
+            }
+
         }
 
 
